@@ -13,7 +13,9 @@
 
 	<!-- 启用spring mvc 注解 -->
 	<mvc:default-servlet-handler />
+	
 	<mvc:annotation-driven>
+	
 		<mvc:message-converters>
 			<!-- Convert JSON -->
 			<bean
@@ -31,8 +33,7 @@
 	</mvc:annotation-driven>
 
 	<!-- 自动扫描的包名 ，使Spring支持自动检测组件，如注解的Controller -->
-	<context:component-scan base-package="resume.controller" />
-	<context:component-scan base-package="shiro.controller" />
+	<context:component-scan base-package="cn.sunnada.controller" />
 
 
 	<!-- 视图解析器:定义跳转的文件的前后缀 -->
@@ -43,11 +44,11 @@
 	</bean>
 	
 	<aop:config proxy-target-class="true"></aop:config>
-	<bean
-		class="  
-org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
-		<property name="securityManager" ref="securityManager" />
-	</bean>
+<!-- 	<bean -->
+<!-- 		class="   -->
+<!-- org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor"> -->
+<!-- 		<property name="securityManager" ref="securityManager" /> -->
+<!-- 	</bean> -->
 
 	<!--配置拦截器, 多个拦截器,顺序执行 -->
 	<mvc:interceptors>
@@ -55,7 +56,7 @@ org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor
 			<!-- 匹配的是url路径 -->
 			<mvc:mapping path="/**" />
 			<mvc:exclude-mapping path="/resources/**" />
-			<bean class="resume.core.interceptor.UserBehaviorInterceptor" />
+			<bean class="cn.sunnada.interceptor.UserBehaviorInterceptor" />
 		</mvc:interceptor>
 		<!-- 当设置多个拦截器时，先按顺序调用preHandle方法，然后逆序调用每个拦截器的postHandle和afterCompletion方法 -->
 	</mvc:interceptors>

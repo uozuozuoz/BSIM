@@ -149,12 +149,6 @@
 			<version>${slf4j.version}</version>
 		</dependency>
 		<!-- log end -->
-		<!-- 映入JSON -->
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-asl</artifactId>
-			<version>1.9.13</version>
-		</dependency>
 		<!-- 上传组件包 -->
 		<dependency>
 			<groupId>commons-fileupload</groupId>
@@ -170,6 +164,18 @@
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 			<version>1.9</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>2.7.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.7.0</version>
 		</dependency>
 
 	</dependencies>
