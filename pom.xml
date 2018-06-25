@@ -26,8 +26,11 @@
 			<!-- 表示开发的时候引入，发布的时候不会加载此包 -->
 			<scope>test</scope>
 		</dependency>
-		<!-- <dependency> <groupId>javax.servlet</groupId> <artifactId>javax.servlet-api</artifactId> 
-			<version>3.1.0</version> </dependency> -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+		</dependency>
 
 		<!-- spring核心包 -->
 		<dependency>
@@ -177,6 +180,7 @@
 			<artifactId>jackson-databind</artifactId>
 			<version>2.7.0</version>
 		</dependency>
+
 
 	</dependencies>
 

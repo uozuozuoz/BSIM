@@ -12,5 +12,10 @@ public class TalkController {
 	public String startTalk() {
 		return "WEB-INF/jsp/index";
 	}
+	
+	@RequestMapping("kefu")
+	public String startKefu() {
+		return "WEB-INF/jsp/kefu";
+	}
 
 }

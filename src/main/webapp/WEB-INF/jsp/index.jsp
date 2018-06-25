@@ -56,14 +56,15 @@ li {
 	src="resources/kindeditor/plugins/code/prettify.js"></script>
 
 <script>
-	// 	KindEditor.ready(function(K) {
-	// 		var options = {
-	// 			cssPath : 'resources/kindeditor/plugins/code/prettify.css',
-	// 			filterMode : true
-	// 		};
-	// 		var editor = K.create('textarea[name="content"]', options);
-	// 		prettyPrint();
-	// 	});
+	var editor;
+	KindEditor.ready(function(K) {
+		var options = {
+			cssPath : 'resources/kindeditor/plugins/code/prettify.css',
+			filterMode : true
+		};
+		editor = K.create('textarea[name="content"]', options);
+		prettyPrint();
+	});
 
 	//自己的昵称
 	var nickname = "风清扬" + Math.random();
@@ -72,38 +73,23 @@ li {
 			"ws://${pageContext.request.getServerName()}:${pageContext.request.getServerPort()}${pageContext.request.contextPath}/websocket");
 	//接收服务器的消息
 	socket.onmessage = function(ev) {
-		var obj = eval('(' + ev.data + ')');
-		addMessage(obj)
+		var obj = '(' + ev.data + ')';
+		$("ul").append("<li>" + obj + "</li>");
 	}
-	//发送按钮被点击时
-	$("#send")
-			.click(
-					function() {
-						if (!um.hasContents()) { // 判断消息输入框是否为空
-							// 消息输入框获取焦点
-							um.focus();
-							// 添加抖动效果
-							$('.edui-container').addClass('am-animation-shake');
-							setTimeout(
-									"$('.edui-container').removeClass('am-animation-shake')",
-									1000);
-						} else {
-							//获取输入框的内容
-							var txt = um.getContent();
-							//构建一个标准格式的JSON对象
-							var obj = JSON.stringify({
-								nickname : nickname,
-								content : txt
-							});
-							// 发送消息
-							socket.send(obj);
-							// 清空消息输入框
-							um.setContent('');
-							// 消息输入框获取焦点
-							um.focus();
-						}
-					});
+
+	function msg() {
+		editor.sync();
+		var txt = $("#editor_id").val();
+		var obj = JSON.stringify({
+			nickname : nickname,
+			content : txt
+		});
+		// 发送消息
+		socket.send(obj);
+		$("#editor_id").val("");
+	}
 </script>
+
 </head>
 <body>
 	<div class="session">
@@ -116,12 +102,10 @@ li {
 				<li>2333</li>
 			</ul>
 		</div>
-		<div class="editarea">
-			<textarea id="editor_id" name="content"
-				style="width: 800px; height: 100px;">
-&lt;strong&gt;HTML内容&lt;/strong&gt;
-</textarea>
-		</div>
+		<form class="editarea" method="post">
+			<textarea id="editor_id" name="content" style="width: 100%; height: 100px;">&lt;strong&gt;HTML内容&lt;/strong&gt;</textarea>
+			<input id="send" type="button" value="发送" onclick="msg()">
+		</form>
 	</div>
 </body>
 </html>

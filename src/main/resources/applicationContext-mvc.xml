@@ -34,7 +34,7 @@
 
 	<!-- 自动扫描的包名 ，使Spring支持自动检测组件，如注解的Controller -->
 	<context:component-scan base-package="cn.sunnada.controller" />
-
+	<context:component-scan base-package="cn.sunnada.util" />
 
 	<!-- 视图解析器:定义跳转的文件的前后缀 -->
 	<bean id="viewResolver"
