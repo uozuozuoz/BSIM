@@ -53,9 +53,13 @@
 	margin: auto;
 }
 
-
 li {
 	list-style-type: none;
+}
+
+.avatar {
+	width: 48px;
+	height: 48px;
 }
 </style>
 <link rel="stylesheet"
@@ -84,9 +88,9 @@ li {
 	//建立一条与服务器之间的连接
 	var socket = new WebSocket(
 			"ws://${pageContext.request.getServerName()}:${pageContext.request.getServerPort()}${pageContext.request.contextPath}/websocket");
-	
+
 	//在连接成功连接server后想服务器发送身份信息
-	socket.onopen = function(ev){
+	socket.onopen = function(ev) {
 		var obj = JSON.stringify({
 			nickname : nickname
 		});
@@ -94,58 +98,99 @@ li {
 	}
 	//接收服务器的消息
 	socket.onmessage = function(ev) {
-		var message = JSON.parse(ev.data);
-		var obj = message.users;
-		
-		if(obj!=null){
+		var data = JSON.parse(ev.data);
+		var obj = data.users;
+
+		if (obj != null) {
 			$(".users ul").html("");
-			for(var i=0;i<obj.length;i++){
-				if(obj[i]=="客服"){
-					
-				}else{
-					$(".users ul").append("<li>"+obj[i]+"</li>");
+			for (var i = 0; i < obj.length; i++) {
+				if (obj[i] == "客服") {
+
+				} else {
+					var li = $("#user").clone(); //复制一份模板，取名为box
+					li.show(); //设置box状态为显示
+					li.appendTo("#userlist"); //把box追加到聊天面板中
+					li.attr("id", obj[i]); //在box中设置昵称
+					li.find('a').attr("href", "#session" + obj[i]); //在box中设置昵称
+					li.find('a').on('click', function() {
+						$('#session' + obj[i]).toggleClass('hidden');
+					})
+					li.find('a').html(obj[i]); //在box中设置昵称
+
+					var session = $("#session").clone(); //复制一份模板，取名为box
+					session.appendTo(".up"); //把box追加到聊天面板中
+					session.attr("id", "session" + obj[i]); //在box中设置昵称
+
 				}
-				
+
 			}
-			
-		}else{
-			var msg = '(' + ev.data + ')';
-			$(".session ul").append("<li>" + msg + "</li>");
+
+		} else {
+
+			var message = JSON.parse(data.message);
+			var box = $("#msgtmp").clone(); //复制一份模板，取名为box
+			box.show(); //设置box状态为显示
+			box.appendTo("#chatContent"); //把box追加到聊天面板中
+			if (message.sender == "客服") {
+				box.find('img').prop("src", "resources/img/pika.png");
+			} else {
+				box.find('img').prop("src", "resources/img/duola.jpg");
+			}
+			box.find('[ff="nickname"]').html(message.sender); //在box中设置昵称
+			box.find('[ff="msgdate"]').html(message.time); //在box中设置时间
+			box.find('[ff="content"]').html(message.content); //在box中设置内容
+			//	 		box.addClass(msg.isSelf ? 'am-comment-flip' : ''); //右侧显示
+			//	 		box.addClass(msg.isSelf ? 'am-comment-warning' : 'am-comment-success');//颜色
+			//	 		box.css((msg.isSelf ? 'margin-left' : 'margin-right'), "20%");//外边距
+			//	 		$("#ChatBox div:eq(0)").scrollTop(999999); //滚动条移动至最底部
+			// 			$(".session ul").append("<li>" + msg + "</li>");
 		}
-		
+
 	}
 
 	function msg() {
 		editor.sync();
 		var txt = $("#editor_id").val();
 		var obj = JSON.stringify({
-			nickname : nickname,
+			sender : nickname,
+			receiver : "风清扬",
 			content : txt
 		});
 		// 发送消息
 		socket.send(obj);
-		$("#editor_id").text("");
+		$("#editor_id").val("");
 	}
-	
-	
 </script>
 </head>
 <body>
 	<div class="bg">
 		<div class="up">
 			<div class="users">
-				<ul>
-					
+				<ul id="userlist">
+					<li id="user" style="display: none"><a href="">00</a></li>
 				</ul>
 			</div>
-			<div class="session">
+			<div id="session" class="session" style="display: none">
 				<div class="chat">
-					<ul>
+					<ul id="chatContent">
+						<li id="msgtmp" style="display: none"><a href=""> <img
+								class="avatar" src="" alt="" />
+						</a>
+							<div class="main">
+								<header class="am-comment-hd">
+								<div class="am-comment-meta">
+									<a ff="nickname" href="#link-to-user" class="am-comment-author"></a>
+									<time ff="msgdate" datetime="" title=""></time>
+								</div>
+								</header>
+								<div ff="content" class="am-comment-bd"></div>
+							</div></li>
 					</ul>
 				</div>
 
 				<form class="editarea" method="post">
-					<textarea id="editor_id" name="content" style="width: 100%; height: 100px;">&lt;strong&gt;HTML内容&lt;/strong&gt;</textarea>
+					<textarea id="editor_id" name="content"
+						style="width: 100%; height: 100px;">&lt;strong&gt;HTML内容&lt;/strong&gt;</textarea>
 					<input id="send" type="button" value="发送" onclick="msg()">
 				</form>
 			</div>

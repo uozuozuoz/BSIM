@@ -44,6 +44,11 @@ ul {
 li {
 	list-style-type: none;
 }
+
+.avatar {
+	width: 48px;
+	height: 48px;
+}
 </style>
 <link rel="stylesheet"
 	href="resources/kindeditor/themes/default/default.css" />
@@ -67,12 +72,12 @@ li {
 	});
 
 	//自己的昵称
-	var nickname = "风清扬"+Math.random();
+	var nickname = "客户"+Math.random();
 	//建立一条与服务器之间的连接
 	var socket = new WebSocket(
 			"ws://${pageContext.request.getServerName()}:${pageContext.request.getServerPort()}${pageContext.request.contextPath}/websocket");
 	//在连接成功连接server后想服务器发送身份信息
-	socket.onopen = function(ev){
+	socket.onopen = function(ev) {
 		var obj = JSON.stringify({
 			nickname : nickname
 		});
@@ -87,8 +92,24 @@ li {
 		console.log(message.content);
 		console.log(message.time);
 		console.log(message.isSelf);
-		
-		$("ul").append("<li>" + message + "</li>");
+
+		var box = $("#msgtmp").clone(); //复制一份模板，取名为box
+		box.show(); //设置box状态为显示
+		box.appendTo("#chatContent"); //把box追加到聊天面板中
+		if(message.sender == "客服"){
+			box.find('img').attr("src","resources/img/pika.png");
+		}else{
+			box.find('img').attr("src","resources/img/duola.jpg");
+		}
+		box.find('[ff="nickname"]').html(message.sender); //在box中设置昵称
+		box.find('[ff="msgdate"]').html(message.time); //在box中设置时间
+		box.find('[ff="content"]').html(message.content); //在box中设置内容
+// 		box.addClass(msg.isSelf ? 'am-comment-flip' : ''); //右侧显示
+// 		box.addClass(msg.isSelf ? 'am-comment-warning' : 'am-comment-success');//颜色
+// 		box.css((msg.isSelf ? 'margin-left' : 'margin-right'), "20%");//外边距
+// 		$("#ChatBox div:eq(0)").scrollTop(999999); //滚动条移动至最底部
+
+// 		$("ul").append("<li>" + message + "</li>");
 	}
 
 	function msg() {
@@ -101,7 +122,7 @@ li {
 		});
 		// 发送消息
 		socket.send(obj);
-		$("#editor_id").text("");
+		$("#editor_id").val("");
 	}
 </script>
 
@@ -109,16 +130,24 @@ li {
 <body>
 	<div class="session">
 		<div class="chat">
-			<ul>
-				<li>hello</li>
-				<li>hi</li>
-				<li>how r u</li>
-				<li>fine</li>
-				<li>2333</li>
+			<ul id="chatContent">
+				<li id="msgtmp" style="display: none"><a href=""> <img
+						class="avatar" src="" alt="" />
+				</a>
+					<div class="main">
+						<header class="am-comment-hd">
+						<div class="am-comment-meta">
+							<a ff="nickname" href="#link-to-user" class="am-comment-author"></a>
+							<time ff="msgdate" datetime="" title=""></time>
+						</div>
+						</header>
+						<div ff="content" class="am-comment-bd"></div>
+					</div></li>
 			</ul>
 		</div>
 		<form class="editarea" method="post">
-			<textarea id="editor_id" name="content" style="width: 100%; height: 100px;">&lt;strong&gt;HTML内容&lt;/strong&gt;</textarea>
+			<textarea id="editor_id" name="content"
+				style="width: 100%; height: 100px;">&lt;strong&gt;HTML内容&lt;/strong&gt;</textarea>
 			<input id="send" type="button" value="发送" onclick="msg()">
 		</form>
 	</div>
