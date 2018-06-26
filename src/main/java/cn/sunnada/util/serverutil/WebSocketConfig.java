@@ -1,4 +1,4 @@
-package cn.sunnada.util;
+package cn.sunnada.util.serverutil;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -80,14 +80,39 @@ li {
 	});
 
 	//自己的昵称
-	var nickname = "客服" + Math.random();
+	var nickname = "客服";
 	//建立一条与服务器之间的连接
 	var socket = new WebSocket(
 			"ws://${pageContext.request.getServerName()}:${pageContext.request.getServerPort()}${pageContext.request.contextPath}/websocket");
+	
+	//在连接成功连接server后想服务器发送身份信息
+	socket.onopen = function(ev){
+		var obj = JSON.stringify({
+			nickname : nickname
+		});
+		socket.send(obj);
+	}
 	//接收服务器的消息
 	socket.onmessage = function(ev) {
-		var obj = '(' + ev.data + ')';
-		$(".session ul").append("<li>" + obj + "</li>");
+		var message = JSON.parse(ev.data);
+		var obj = message.users;
+		
+		if(obj!=null){
+			$(".users ul").html("");
+			for(var i=0;i<obj.length;i++){
+				if(obj[i]=="客服"){
+					
+				}else{
+					$(".users ul").append("<li>"+obj[i]+"</li>");
+				}
+				
+			}
+			
+		}else{
+			var msg = '(' + ev.data + ')';
+			$(".session ul").append("<li>" + msg + "</li>");
+		}
+		
 	}
 
 	function msg() {
@@ -99,8 +124,10 @@ li {
 		});
 		// 发送消息
 		socket.send(obj);
-		$("#editor_id").val("");
+		$("#editor_id").text("");
 	}
+	
+	
 </script>
 </head>
 <body>
@@ -108,11 +135,10 @@ li {
 		<div class="up">
 			<div class="users">
 				<ul>
-					<li>1</li>
-					<li>2</li>
+					
 				</ul>
 			</div>
-			<div class="session hidden">
+			<div class="session">
 				<div class="chat">
 					<ul>
 					</ul>
@@ -120,28 +146,6 @@ li {
 
 				<form class="editarea" method="post">
 					<textarea id="editor_id" name="content" style="width: 100%; height: 100px;">&lt;strong&gt;HTML内容&lt;/strong&gt;</textarea>
-					<input id="send" type="button" value="发送" onclick="msg()">
-				</form>
-			</div>
-			<div class="session hidden" id="session1">
-				<div class="chat">
-					<ul>
-					</ul>
-				</div>
-
-				<form class="editarea" method="post">
-					<textarea id="editor_id" name="content" style="width: 100%; height: 100px;">session1</textarea>
-					<input id="send" type="button" value="发送" onclick="msg()">
-				</form>
-			</div>
-			<div class="session" id="session2">
-				<div class="chat">
-					<ul>
-					</ul>
-				</div>
-
-				<form class="editarea" method="post">
-					<textarea id="editor_id" name="content" style="width: 100%; height: 100px;">session2</textarea>
 					<input id="send" type="button" value="发送" onclick="msg()">
 				</form>
 			</div>

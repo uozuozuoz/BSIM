@@ -67,26 +67,41 @@ li {
 	});
 
 	//自己的昵称
-	var nickname = "风清扬" + Math.random();
+	var nickname = "风清扬"+Math.random();
 	//建立一条与服务器之间的连接
 	var socket = new WebSocket(
 			"ws://${pageContext.request.getServerName()}:${pageContext.request.getServerPort()}${pageContext.request.contextPath}/websocket");
+	//在连接成功连接server后想服务器发送身份信息
+	socket.onopen = function(ev){
+		var obj = JSON.stringify({
+			nickname : nickname
+		});
+		socket.send(obj);
+	}
 	//接收服务器的消息
 	socket.onmessage = function(ev) {
-		var obj = '(' + ev.data + ')';
-		$("ul").append("<li>" + obj + "</li>");
+		var data = JSON.parse(ev.data);
+		var message = JSON.parse(data.message)
+		console.log(message.sender);
+		console.log(message.receiver);
+		console.log(message.content);
+		console.log(message.time);
+		console.log(message.isSelf);
+		
+		$("ul").append("<li>" + message + "</li>");
 	}
 
 	function msg() {
 		editor.sync();
 		var txt = $("#editor_id").val();
 		var obj = JSON.stringify({
-			nickname : nickname,
+			sender : nickname,
+			receiver : "客服",
 			content : txt
 		});
 		// 发送消息
 		socket.send(obj);
-		$("#editor_id").val("");
+		$("#editor_id").text("");
 	}
 </script>
 

@@ -1,4 +1,4 @@
-package cn.sunnada.util;
+package cn.sunnada.util.serverutil;
 
 import java.util.Map;
 

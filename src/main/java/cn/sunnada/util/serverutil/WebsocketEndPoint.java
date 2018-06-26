@@ -1,4 +1,4 @@
-package cn.sunnada.util;
+package cn.sunnada.util.serverutil;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -11,46 +11,44 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import com.alibaba.fastjson.JSONObject;
 
+import cn.sunnada.entity.ReturnMessage;
+import cn.sunnada.util.maputil.NewMap;
+import cn.sunnada.util.messageutil.MessageHandler;
+
 /*
  * websocket消息处理类
  */
 public class WebsocketEndPoint extends TextWebSocketHandler {
 
-	public static final Map<String, WebSocketSession> userSocketSessionMap;
+	public static final NewMap<String, WebSocketSession> userSocketSessionMap;
 	static {
-		userSocketSessionMap = new HashMap<String, WebSocketSession>();
+		userSocketSessionMap = new NewMap<String, WebSocketSession>();
 	}
 
 	@Override
 	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
 		// TODO Auto-generated method stub
-		super.handleTextMessage(session, message);
+//		super.handleTextMessage(session, message);
+System.out.println(this);
+		new MessageHandler().handle(session, message, userSocketSessionMap);
 
-		JSONObject jsonobj = JSONObject.parseObject(message.getPayload());
-		String nickname = jsonobj.getString("nickname");
-		String sessionid = session.getId();
-		String content = jsonobj.getString("content");
-		TextMessage returnMessage = new TextMessage(sessionid+":"+content);
-		Iterator<Map.Entry<String, WebSocketSession>> iterator = userSocketSessionMap.entrySet().iterator();
-		while (iterator.hasNext()) {
-		    Map.Entry<String, WebSocketSession> entry = iterator.next();
-		    entry.getValue().sendMessage(returnMessage);
-		}
-		
 	}
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-		
+
 		super.afterConnectionEstablished(session);
-		userSocketSessionMap.put(session.getId(), session);
+
 	}
 
+	/*
+	 * 当断开连接时，清楚会话
+	 */
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-		
+
 		super.afterConnectionClosed(session, status);
-		userSocketSessionMap.remove(session.getId());
+		userSocketSessionMap.remove(userSocketSessionMap.getKeyByValue(session));
 	}
 
 }
