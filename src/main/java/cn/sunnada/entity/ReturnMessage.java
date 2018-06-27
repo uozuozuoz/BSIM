@@ -75,7 +75,7 @@ public class ReturnMessage {
 		this.jsonobj = jsonobj;
 		this.sender = jsonobj.getString("sender");
 		this.receiver = jsonobj.getString("receiver");
-		this.content = jsonobj.getString("content");
+		this.content = jsonobj.getString("content").replaceAll("\"", "\'");
 		this.time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 	}
 

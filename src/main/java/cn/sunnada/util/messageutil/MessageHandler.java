@@ -21,7 +21,7 @@ public class MessageHandler {
 		String nickname = jsonobj.getString("nickname");
 		if (nickname != null) {
 			userSocketSessionMap.put(nickname, session);
-			WebSocketSession kefu = userSocketSessionMap.get("客服");
+			WebSocketSession kefu = userSocketSessionMap.get("kefu");
 			if(kefu!=null) {
 				Map map = new HashMap<String, Set>();
 				map.put("users", userSocketSessionMap.keySet());

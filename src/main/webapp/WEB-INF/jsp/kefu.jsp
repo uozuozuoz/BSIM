@@ -36,7 +36,7 @@
 	height: 60%;
 	margin-left: 20px;
 	margin-top: 100px;
-	background-color: blue;
+
 	float: left;
 }
 
@@ -74,17 +74,36 @@ li {
 
 <script>
 	var editor;
-	KindEditor.ready(function(K) {
+	function createKE() {
+		var ed;
 		var options = {
 			cssPath : 'resources/kindeditor/plugins/code/prettify.css',
-			filterMode : true
+			filterMode : true,
+			uploadJson : 'resources/kindeditor/jsp/upload_json.jsp',
+			fileManagerJson : 'resources/kindeditor/jsp/file_manager_json.jsp',
+			allowFileManager : true,
+			afterUpload : function(url, data, name) { //上传文件后执行的回调函数，必须为3个参数
+				if (name == "image" || name == "multiimage") { //单个和批量上传图片时
+					var img = new Image();
+					img.src = url;
+					img.onload = function() { //图片必须加载完成才能获取尺寸
+						if (img.width > 600)
+							editor.html(editor.html().replace(
+									'<img src="' + url + '"',
+									'<img src="' + url
+											+ '" width="200" height="200"'))
+					}
+				}
+			}
 		};
-		editor = K.create('textarea[name="content"]', options);
+		var kep = $('.session :visible').find('textarea[name="content"]');
+		ed = KindEditor.create(kep, options);
 		prettyPrint();
-	});
+		return ed;
+	}
 
 	//自己的昵称
-	var nickname = "客服";
+	var nickname = "kefu";
 	//建立一条与服务器之间的连接
 	var socket = new WebSocket(
 			"ws://${pageContext.request.getServerName()}:${pageContext.request.getServerPort()}${pageContext.request.contextPath}/websocket");
@@ -103,24 +122,28 @@ li {
 
 		if (obj != null) {
 			$(".users ul").html("");
+			// 			$("#sessions").html("");
 			for (var i = 0; i < obj.length; i++) {
-				if (obj[i] == "客服") {
+				if (obj[i] == nickname) {
 
 				} else {
-					var li = $("#user").clone(); //复制一份模板，取名为box
-					li.show(); //设置box状态为显示
-					li.appendTo("#userlist"); //把box追加到聊天面板中
-					li.attr("id", obj[i]); //在box中设置昵称
-					li.find('a').attr("href", "#session" + obj[i]); //在box中设置昵称
+					let li = $("#user").clone();
+					li.show();
+					li.appendTo("#userlist");
+					li.attr("id", obj[i]);
+					li.find('a').attr("href", "#session" + obj[i]);
+					li.find('a').html(obj[i]);
+
+					let session = $("#session").clone(true);
+					session.appendTo("#sessions");
+					session.attr("id", "session" + obj[i]);
+					session.find("ul").attr("id", "chatContent" + obj[i]);
 					li.find('a').on('click', function() {
-						$('#session' + obj[i]).toggleClass('hidden');
+
+						$("#sessions .session").hide();
+						session.show();
+						editor = createKE();
 					})
-					li.find('a').html(obj[i]); //在box中设置昵称
-
-					var session = $("#session").clone(); //复制一份模板，取名为box
-					session.appendTo(".up"); //把box追加到聊天面板中
-					session.attr("id", "session" + obj[i]); //在box中设置昵称
-
 				}
 
 			}
@@ -128,37 +151,46 @@ li {
 		} else {
 
 			var message = JSON.parse(data.message);
-			var box = $("#msgtmp").clone(); //复制一份模板，取名为box
+			var box = $("#chatContent li").clone(); //复制一份模板，取名为box
 			box.show(); //设置box状态为显示
-			box.appendTo("#chatContent"); //把box追加到聊天面板中
-			if (message.sender == "客服") {
+			var obj;
+
+			if (message.sender == nickname) {
+				obj = message.receiver;
 				box.find('img').prop("src", "resources/img/pika.png");
 			} else {
+				obj = message.sender;
 				box.find('img').prop("src", "resources/img/duola.jpg");
 			}
+
 			box.find('[ff="nickname"]').html(message.sender); //在box中设置昵称
 			box.find('[ff="msgdate"]').html(message.time); //在box中设置时间
 			box.find('[ff="content"]').html(message.content); //在box中设置内容
-			//	 		box.addClass(msg.isSelf ? 'am-comment-flip' : ''); //右侧显示
-			//	 		box.addClass(msg.isSelf ? 'am-comment-warning' : 'am-comment-success');//颜色
-			//	 		box.css((msg.isSelf ? 'margin-left' : 'margin-right'), "20%");//外边距
-			//	 		$("#ChatBox div:eq(0)").scrollTop(999999); //滚动条移动至最底部
-			// 			$(".session ul").append("<li>" + msg + "</li>");
+// 						box.appendTo("#userlist"); //把box追加到聊天面板中
+			box.appendTo("#chatContent" + obj); //把box追加到聊天面板中
+			console.log("#chatContent"+obj);
+			var chatNode = $("#chatContent"+obj);
+
 		}
 
 	}
 
-	function msg() {
+	function msg(node) {
+
+		var fnode = node.parentNode.parentNode;
+console.log(editor)
 		editor.sync();
-		var txt = $("#editor_id").val();
+		var textarea = $(node).siblings("textarea");
+		var txt = textarea.val();
+		var receiverid = fnode.id.split("session")[1].trim();
 		var obj = JSON.stringify({
 			sender : nickname,
-			receiver : "风清扬",
+			receiver : receiverid,
 			content : txt
 		});
 		// 发送消息
 		socket.send(obj);
-		$("#editor_id").val("");
+
 	}
 </script>
 </head>
@@ -166,34 +198,39 @@ li {
 	<div class="bg">
 		<div class="up">
 			<div class="users">
+				<!-- 			用户li模板 -->
+				<li id="user" style="display: none"><a href="">00</a></li>
+
 				<ul id="userlist">
-					<li id="user" style="display: none"><a href="">00</a></li>
+
 				</ul>
 			</div>
+			<!-- 			会话模板 -->
 			<div id="session" class="session" style="display: none">
 				<div class="chat">
 					<ul id="chatContent">
-						<li id="msgtmp" style="display: none"><a href=""> <img
+						<li  style="display: none"><a href=""> <img
 								class="avatar" src="" alt="" />
 						</a>
 							<div class="main">
 								<header class="am-comment-hd">
 								<div class="am-comment-meta">
-									<a ff="nickname" href="#link-to-user" class="am-comment-author"></a>
-									<time ff="msgdate" datetime="" title=""></time>
+									<a ff="nickname" href="#link-to-user" class="am-comment-author">某人</a>
+									<time ff="msgdate" datetime="" title="">时间</time>
 								</div>
 								</header>
-								<div ff="content" class="am-comment-bd"></div>
+								<div ff="content" class="am-comment-bd">内容</div>
 							</div></li>
 					</ul>
 				</div>
 
 				<form class="editarea" method="post">
-					<textarea id="editor_id" name="content"
-						style="width: 100%; height: 100px;">&lt;strong&gt;HTML内容&lt;/strong&gt;</textarea>
-					<input id="send" type="button" value="发送" onclick="msg()">
+					<textarea name="content" style="width: 100%; height: 100px;">&lt;strong&gt;HTML内容&lt;/strong&gt;</textarea>
+					<input type="button" value="发送" onclick="msg(this)">
 				</form>
 			</div>
+			<div id="sessions"></div>
+
 		</div>
 	</div>
 

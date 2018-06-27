@@ -65,14 +65,25 @@ li {
 	KindEditor.ready(function(K) {
 		var options = {
 			cssPath : 'resources/kindeditor/plugins/code/prettify.css',
-			filterMode : true
+			filterMode : true,
+			uploadJson : 'resources/kindeditor/jsp/upload_json.jsp',
+            fileManagerJson : 'resources/kindeditor/jsp/file_manager_json.jsp',
+            allowFileManager : true,
+            afterUpload : function(url, data, name) { //上传文件后执行的回调函数，必须为3个参数
+                if(name=="image" || name=="multiimage"){ //单个和批量上传图片时
+                    var img = new Image(); img.src = url;
+                    img.onload = function(){ //图片必须加载完成才能获取尺寸
+                        if(img.width>600) editor.html(editor.html().replace('<img src="' + url + '"','<img src="' + url + '" width="200" height="200"'))
+                    }
+                }
+            }
 		};
 		editor = K.create('textarea[name="content"]', options);
 		prettyPrint();
 	});
 
 	//自己的昵称
-	var nickname = "客户"+Math.random();
+	var nickname = "kehu";
 	//建立一条与服务器之间的连接
 	var socket = new WebSocket(
 			"ws://${pageContext.request.getServerName()}:${pageContext.request.getServerPort()}${pageContext.request.contextPath}/websocket");
@@ -96,7 +107,7 @@ li {
 		var box = $("#msgtmp").clone(); //复制一份模板，取名为box
 		box.show(); //设置box状态为显示
 		box.appendTo("#chatContent"); //把box追加到聊天面板中
-		if(message.sender == "客服"){
+		if(message.sender == "kefu"){
 			box.find('img').attr("src","resources/img/pika.png");
 		}else{
 			box.find('img').attr("src","resources/img/duola.jpg");
@@ -117,12 +128,12 @@ li {
 		var txt = $("#editor_id").val();
 		var obj = JSON.stringify({
 			sender : nickname,
-			receiver : "客服",
+			receiver : "kefu",
 			content : txt
 		});
 		// 发送消息
 		socket.send(obj);
-		$("#editor_id").val("");
+// 		$("#editor_id").val("");
 	}
 </script>
 
