@@ -4,52 +4,55 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Insert title here</title>
+<title>与客户聊天中</title>
 <style>
+body {
+	background: url(resources/img/18.jpg);
+}
+
 .bg {
 	position: relative;
 	width: 100%;
-	height: 1000px;
+	height: 100%;
 	top: 0;
 	bottom: 0;
-	/* 	background-color: #7A378B; */
 }
 
 .up {
 	width: 1000px;
-	height: 1000px;
+	height: 100%;
 	margin: 0 auto;
-	/* 	background-color: #7CCD7C; */
 }
 
 .users {
 	width: 30%;
-	height: 60%;
+	height: 100%;
 	margin-top: 100px;
-	background-color: yellow;
 	width: 30%;
 	float: left;
 }
 
+#sessions {
+	height: 100%;
+}
+
 .session {
 	width: 68%;
-	height: 60%;
+	height: 100%;
 	margin-left: 20px;
 	margin-top: 100px;
-
 	float: left;
 }
 
 .chat {
 	width: 100%;
-	height: 400px;
+	height: 362px;
 	margin: auto;
-	border: 3px solid black;
 }
 
 .editarea {
 	width: 100%;
-	height: 200px;
+	height: 30%;
 	margin: auto;
 }
 
@@ -66,7 +69,11 @@ li {
 	href="resources/kindeditor/themes/default/default.css" />
 <link rel="stylesheet"
 	href="resources/kindeditor/plugins/code/prettify.css" />
+<link rel="stylesheet" href="resources/bootstrap/css/bootstrap.css" />
+<link rel="stylesheet"
+	href="resources/bootstrap/css/bootstrap-theme.css" />
 <script charset="utf-8" src="resources/jquery/jquery.min.js"></script>
+<script charset="utf-8" src="resources/bootstrap/js/bootstrap.min.js"></script>
 <script charset="utf-8" src="resources/kindeditor/kindeditor-all.js"></script>
 <script charset="utf-8" src="resources/kindeditor/lang/zh-CN.js"></script>
 <script charset="utf-8"
@@ -122,7 +129,7 @@ li {
 
 		if (obj != null) {
 			$(".users ul").html("");
-			// 			$("#sessions").html("");
+			$("#sessions").html("");
 			for (var i = 0; i < obj.length; i++) {
 				if (obj[i] == nickname) {
 
@@ -138,12 +145,18 @@ li {
 					session.appendTo("#sessions");
 					session.attr("id", "session" + obj[i]);
 					session.find("ul").attr("id", "chatContent" + obj[i]);
-					li.find('a').on('click', function() {
+					li.find('a').on(
+							'click',
+							function() {
 
-						$("#sessions .session").hide();
-						session.show();
-						editor = createKE();
-					})
+								$("#sessions .session").hide();
+								session.show();
+								editor = createKE();
+								session.find(".panel-title").html(
+										"与"
+												+ session.attr("id").split(
+														"session")[1] + "聊天中")
+							})
 				}
 
 			}
@@ -166,22 +179,26 @@ li {
 			box.find('[ff="nickname"]').html(message.sender); //在box中设置昵称
 			box.find('[ff="msgdate"]').html(message.time); //在box中设置时间
 			box.find('[ff="content"]').html(message.content); //在box中设置内容
-// 						box.appendTo("#userlist"); //把box追加到聊天面板中
+			// 						box.appendTo("#userlist"); //把box追加到聊天面板中
 			box.appendTo("#chatContent" + obj); //把box追加到聊天面板中
-			console.log("#chatContent"+obj);
-			var chatNode = $("#chatContent"+obj);
+			console.log("#chatContent" + obj);
+			var chatNode = $("#chatContent" + obj);
 
 		}
 
 	}
+	String.prototype.replaceAll = function(search, replacement) {
+		var target = this;
+		return target.replace(new RegExp(search, 'g'), replacement);
+	};
 
 	function msg(node) {
 
-		var fnode = node.parentNode.parentNode;
-console.log(editor)
+		var fnode = node.parentNode.parentNode.parentNode.parentNode;
 		editor.sync();
 		var textarea = $(node).siblings("textarea");
-		var txt = textarea.val();
+		var txt = textarea.val().replaceAll("\n", "").replaceAll("\r", "")
+				.replaceAll("\t", "");
 		var receiverid = fnode.id.split("session")[1].trim();
 		var obj = JSON.stringify({
 			sender : nickname,
@@ -197,37 +214,57 @@ console.log(editor)
 <body>
 	<div class="bg">
 		<div class="up">
+
 			<div class="users">
-				<!-- 			用户li模板 -->
-				<li id="user" style="display: none"><a href="">00</a></li>
+				<div class="panel panel-primary">
+					<div class="panel-heading">
+						<h3 class="panel-title">客户列表</h3>
+					</div>
+					<div class="panel-body" style="height: 626px">
+						<!-- 			用户li模板 -->
+						<li id="user" style="display: none"><a href="">00</a></li>
 
-				<ul id="userlist">
+						<ul id="userlist">
 
-				</ul>
-			</div>
-			<!-- 			会话模板 -->
-			<div id="session" class="session" style="display: none">
-				<div class="chat">
-					<ul id="chatContent">
-						<li  style="display: none"><a href=""> <img
-								class="avatar" src="" alt="" />
-						</a>
-							<div class="main">
-								<header class="am-comment-hd">
-								<div class="am-comment-meta">
-									<a ff="nickname" href="#link-to-user" class="am-comment-author">某人</a>
-									<time ff="msgdate" datetime="" title="">时间</time>
-								</div>
-								</header>
-								<div ff="content" class="am-comment-bd">内容</div>
-							</div></li>
-					</ul>
+						</ul>
+					</div>
+					<div class="panel-footer"></div>
 				</div>
 
-				<form class="editarea" method="post">
-					<textarea name="content" style="width: 100%; height: 100px;">&lt;strong&gt;HTML内容&lt;/strong&gt;</textarea>
-					<input type="button" value="发送" onclick="msg(this)">
-				</form>
+			</div>
+
+			<!-- 			会话模板 -->
+			<div id="session" class="session" style="display: none">
+				<div class="panel panel-primary">
+					<div class="panel-heading">
+						<h3 class="panel-title">与聊天中</h3>
+					</div>
+					<div class="panel-body">
+						<div class="chat pre-scrollable" style="max-height: 362px">
+							<ul id="chatContent">
+								<li style="display: none"><a href=""> <img
+										class="avatar" src="" alt="" />
+								</a>
+									<div class="main">
+										<header class="am-comment-hd">
+										<div class="am-comment-meta">
+											<a ff="nickname" href="#link-to-user"
+												class="am-comment-author">某人</a>
+											<time ff="msgdate" datetime="" title="">时间</time>
+										</div>
+										</header>
+										<div ff="content" class="am-comment-bd">内容</div>
+									</div></li>
+							</ul>
+						</div>
+					</div>
+					<div class="panel-footer">
+						<form class="editarea" method="post">
+							<textarea name="content" style="width: 100%; height: 112px;">&lt;strong&gt;HTML内容&lt;/strong&gt;</textarea>
+							<input type="button" value="发送" onclick="msg(this)">
+						</form>
+					</div>
+				</div>
 			</div>
 			<div id="sessions"></div>
 
