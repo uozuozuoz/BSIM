@@ -7,7 +7,7 @@
 <title>与客户聊天中</title>
 <style>
 body {
-	background: url(resources/img/18.jpg);
+	background: url(resources/img/18.jpg) round;
 }
 
 .bg {
@@ -64,6 +64,14 @@ li {
 	width: 48px;
 	height: 48px;
 }
+
+.self {
+	text-align: right;
+}
+
+.am-comment-bd img:hover {
+	cursor: zoom-in;
+}
 </style>
 <link rel="stylesheet"
 	href="resources/kindeditor/themes/default/default.css" />
@@ -74,12 +82,25 @@ li {
 	href="resources/bootstrap/css/bootstrap-theme.css" />
 <script charset="utf-8" src="resources/jquery/jquery.min.js"></script>
 <script charset="utf-8" src="resources/bootstrap/js/bootstrap.min.js"></script>
+<script charset="utf-8" src="resources/js/zoom.js"></script>
 <script charset="utf-8" src="resources/kindeditor/kindeditor-all.js"></script>
 <script charset="utf-8" src="resources/kindeditor/lang/zh-CN.js"></script>
 <script charset="utf-8"
 	src="resources/kindeditor/plugins/code/prettify.js"></script>
 
 <script>
+	$(function() {
+		$(".am-comment-bd img").on(
+				"click",
+				function() {
+					console.log("ss")
+					$(".bigimg").attr("src", $(event.srcElement).attr("src"))
+							.attr("style",
+									"width:" + $(event.srcElement).width * 2);
+				})
+
+	})
+
 	var editor;
 	function createKE() {
 		var ed;
@@ -95,10 +116,12 @@ li {
 					img.src = url;
 					img.onload = function() { //图片必须加载完成才能获取尺寸
 						if (img.width > 600)
+							// 							editor.html(editor.html().replace(
+							// 									'<img src="' + url + '"',
+							// 									'<img src="' + url + '" width="200"'))
 							editor.html(editor.html().replace(
 									'<img src="' + url + '"',
-									'<img src="' + url
-											+ '" width="200" height="200"'))
+									'<img src="' + url + '" width="200"'))
 					}
 				}
 			}
@@ -179,9 +202,9 @@ li {
 			box.find('[ff="nickname"]').html(message.sender); //在box中设置昵称
 			box.find('[ff="msgdate"]').html(message.time); //在box中设置时间
 			box.find('[ff="content"]').html(message.content); //在box中设置内容
+			box.addClass(message.isSelf ? 'self' : ''); //右侧显示
 			// 						box.appendTo("#userlist"); //把box追加到聊天面板中
 			box.appendTo("#chatContent" + obj); //把box追加到聊天面板中
-			console.log("#chatContent" + obj);
 			var chatNode = $("#chatContent" + obj);
 
 		}
@@ -199,7 +222,11 @@ li {
 		var textarea = $(node).siblings("textarea");
 		var txt = textarea.val().replaceAll("\n", "").replaceAll("\r", "")
 				.replaceAll("\t", "");
+
 		var receiverid = fnode.id.split("session")[1].trim();
+		if (txt.length == 0) {
+			return;
+		}
 		var obj = JSON.stringify({
 			sender : nickname,
 			receiver : receiverid,
@@ -207,7 +234,7 @@ li {
 		});
 		// 发送消息
 		socket.send(obj);
-
+		editor.html("");
 	}
 </script>
 </head>
@@ -270,6 +297,5 @@ li {
 
 		</div>
 	</div>
-
 </body>
 </html>

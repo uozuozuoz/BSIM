@@ -84,10 +84,10 @@ while (itr.hasNext()) {
 	long fileSize = item.getSize();
 	if (!item.isFormField()) {
 		//检查文件大小
-		if(item.getSize() > maxSize){
-			out.println(getError("上传文件大小超过限制。"));
-			return;
-		}
+// 		if(item.getSize() > maxSize){
+// 			out.println(getError("上传文件大小超过限制。"));
+// 			return;
+// 		}
 		//检查扩展名
 		String fileExt = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
 		if(!Arrays.<String>asList(extMap.get(dirName).split(",")).contains(fileExt)){

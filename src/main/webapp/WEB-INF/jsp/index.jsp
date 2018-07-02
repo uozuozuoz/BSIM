@@ -13,7 +13,7 @@
 <title>与客服联系中...</title>
 <style>
 body {
-	background: url(resources/img/27.jpg);
+	background: url(resources/img/27.jpg) round;
 }
 
 .session {
@@ -41,7 +41,7 @@ body {
 }
 
 ul {
-
+	
 }
 
 li {
@@ -52,6 +52,14 @@ li {
 	width: 48px;
 	height: 48px;
 }
+
+.self {
+	text-align: right;
+}
+
+.am-comment-bd img:hover {
+	cursor: zoom-in;
+}
 </style>
 <link rel="stylesheet"
 	href="resources/kindeditor/themes/default/default.css" />
@@ -61,13 +69,22 @@ li {
 <link rel="stylesheet"
 	href="resources/bootstrap/css/bootstrap-theme.css" />
 <script charset="utf-8" src="resources/jquery/jquery.min.js"></script>
-<script charset="utf-8" src="resources/bootstrap/bootstrap.min.js"></script>
+<script charset="utf-8" src="resources/bootstrap/js/bootstrap.min.js"></script>
+<script charset="utf-8" src="resources/js/zoom.js"></script>
 <script charset="utf-8" src="resources/kindeditor/kindeditor-all.js"></script>
 <script charset="utf-8" src="resources/kindeditor/lang/zh-CN.js"></script>
 <script charset="utf-8"
 	src="resources/kindeditor/plugins/code/prettify.js"></script>
 
 <script>
+	$(function() {
+		$(".am-comment-bd img").on("click",function(){
+			console.log("ii")
+			$(".bigimg").attr("src",$(event.srcElement).attr("src")).attr("style","width:"+$(event.srcElement).width*2);
+		})
+		
+	})
+
 	var editor;
 	KindEditor.ready(function(K) {
 		var options = {
@@ -81,11 +98,13 @@ li {
 					var img = new Image();
 					img.src = url;
 					img.onload = function() { //图片必须加载完成才能获取尺寸
-						if (img.width > 600)
-							editor.html(editor.html().replace(
-									'<img src="' + url + '"',
-									'<img src="' + url
-											+ '" width="200" height="200"'))
+						// 						if (img.width > 600)
+						// 							editor.html(editor.html().replace(
+						// 									'<img src="' + url + '"',
+						// 									'<img src="' + url + '" width="200"'))
+						editor.html(editor.html().replace(
+								'<img src="' + url + '"',
+								'<img src="' + url + '" width="200"'))
 					}
 				}
 			}
@@ -95,7 +114,7 @@ li {
 	});
 
 	//自己的昵称
-	var nickname = "kehu"+ Math.floor(Math.random()*10+1);
+	var nickname = "kehu" + Math.floor(Math.random() * 10 + 1);
 	//建立一条与服务器之间的连接
 	var socket = new WebSocket(
 			"ws://${pageContext.request.getServerName()}:${pageContext.request.getServerPort()}${pageContext.request.contextPath}/websocket");
@@ -122,14 +141,14 @@ li {
 		box.find('[ff="nickname"]').html(message.sender); //在box中设置昵称
 		box.find('[ff="msgdate"]').html(message.time); //在box中设置时间
 		box.find('[ff="content"]').html(message.content); //在box中设置内容
-		// 		box.addClass(msg.isSelf ? 'am-comment-flip' : ''); //右侧显示
+		box.addClass(message.isSelf ? 'self' : ''); //右侧显示
 		// 		box.addClass(msg.isSelf ? 'am-comment-warning' : 'am-comment-success');//颜色
 		// 		box.css((msg.isSelf ? 'margin-left' : 'margin-right'), "20%");//外边距
 		// 		$("#ChatBox div:eq(0)").scrollTop(999999); //滚动条移动至最底部
 
 		// 		$("ul").append("<li>" + message + "</li>");
 	}
-	
+
 	String.prototype.replaceAll = function(search, replacement) {
 		var target = this;
 		return target.replace(new RegExp(search, 'g'), replacement);
@@ -137,7 +156,11 @@ li {
 
 	function msg() {
 		editor.sync();
-		var txt = $("#editor_id").val().replaceAll("\n", "").replaceAll("\r", "").replaceAll("\t", "");
+		var txt = $("#editor_id").val().replaceAll("\n", "").replaceAll("\r",
+				"").replaceAll("\t", "");
+		if (txt.length == 0) {
+			return;
+		}
 		var obj = JSON.stringify({
 			sender : nickname,
 			receiver : "kefu",
@@ -145,13 +168,13 @@ li {
 		});
 		// 发送消息
 		socket.send(obj);
-		// 		$("#editor_id").val("");
+		editor.html("");
 	}
 </script>
 
 </head>
 <body>
-	
+
 	<div class="session">
 		<div class="panel panel-default">
 			<div class="panel-heading">
@@ -186,5 +209,6 @@ li {
 
 
 	</div>
+
 </body>
 </html>
