@@ -32,6 +32,10 @@ body {
 	float: left;
 }
 
+#userlist {
+	padding: 0;
+}
+
 #sessions {
 	height: 100%;
 }
@@ -72,6 +76,70 @@ li {
 .am-comment-bd img:hover {
 	cursor: zoom-in;
 }
+
+.user {
+	height: 60px;
+	border: 1px solid pink;
+}
+
+.nav-link {
+	position: relative;
+	padding: 0 14px;
+	line-height: 34px;
+	font-size: 10px;
+	font-weight: bold;
+	color: #555;
+	text-decoration: none;
+}
+
+.nav-link:hover {
+	color: #333;
+	text-decoration: underline;
+}
+
+.nav-counter {
+	position: absolute;
+	top: -1px;
+	right: 1px;
+	min-width: 8px;
+	height: 20px;
+	line-height: 20px;
+	margin-top: -11px;
+	padding: 0 6px;
+	font-weight: normal;
+	color: white;
+	text-align: center;
+	text-shadow: 0 1px rgba(0, 0, 0, 0.2);
+	background: #e23442;
+	border: 1px solid #911f28;
+	border-radius: 11px;
+	background-image: -webkit-linear-gradient(top, #e8616c, #dd202f);
+	background-image: -moz-linear-gradient(top, #e8616c, #dd202f);
+	background-image: -o-linear-gradient(top, #e8616c, #dd202f);
+	background-image: linear-gradient(to bottom, #e8616c, #dd202f);
+	-webkit-box-shadow: inset 0 0 1px 1px rgba(255, 255, 255, 0.1), 0 1px
+		rgba(0, 0, 0, 0.12);
+	box-shadow: inset 0 0 1px 1px rgba(255, 255, 255, 0.1), 0 1px
+		rgba(0, 0, 0, 0.12);
+}
+
+.nav-counter-green {
+	background: #75a940;
+	border: 1px solid #42582b;
+	background-image: -webkit-linear-gradient(top, #8ec15b, #689739);
+	background-image: -moz-linear-gradient(top, #8ec15b, #689739);
+	background-image: -o-linear-gradient(top, #8ec15b, #689739);
+	background-image: linear-gradient(to bottom, #8ec15b, #689739);
+}
+
+.nav-counter-blue {
+	background: #3b8de2;
+	border: 1px solid #215a96;
+	background-image: -webkit-linear-gradient(top, #67a7e9, #2580df);
+	background-image: -moz-linear-gradient(top, #67a7e9, #2580df);
+	background-image: -o-linear-gradient(top, #67a7e9, #2580df);
+	background-image: linear-gradient(to bottom, #67a7e9, #2580df);
+}
 </style>
 <link rel="stylesheet"
 	href="resources/kindeditor/themes/default/default.css" />
@@ -99,7 +167,54 @@ li {
 									"width:" + $(event.srcElement).width * 2);
 				})
 
-	})
+	});
+
+	var msgCount = 0;
+	// 	浏览器窗口焦点的判断
+	var isWindowFocus = true;
+	function focusin() {
+		isWindowFocus = true;
+		
+	}
+	function focusout() {
+		isWindowFocus = false;
+
+	}
+	// 	浏览器窗口焦点的切换
+
+	window.onfocus = focusin;
+	window.onblur = focusout;
+
+	var flashTitleRun = false;
+	var flashStep = 0;
+	var normalTitle = "与客户聊天中。。。";
+	function flashTitle() {
+		if (isWindowFocus) {
+			document.title = normalTitle;
+			flashTitleRun = false;
+			return;
+		} else {
+			flashTitleRun = true;
+			flashStep++;
+			if (flashStep == 3) {
+				flashStep = 1;
+			}
+			if (flashStep == 1) {
+				document.title = "【有新消息。。。】";
+			}
+			if (flashStep == 2) {
+				document.title = "【。。。有新消息 】";
+			}
+
+			setTimeout("flashTitle()", 500);
+		}
+	}
+
+	function doFlashTitle() {
+		if (!flashTitleRun) {
+			flashTitle();
+		}
+	}
 
 	var editor;
 	function createKE() {
@@ -107,6 +222,7 @@ li {
 		var options = {
 			cssPath : 'resources/kindeditor/plugins/code/prettify.css',
 			filterMode : true,
+			items : [ 'emoticons', 'image' ],
 			uploadJson : 'resources/kindeditor/jsp/upload_json.jsp',
 			fileManagerJson : 'resources/kindeditor/jsp/file_manager_json.jsp',
 			allowFileManager : true,
@@ -115,13 +231,10 @@ li {
 					var img = new Image();
 					img.src = url;
 					img.onload = function() { //图片必须加载完成才能获取尺寸
-						if (img.width > 600)
-							// 							editor.html(editor.html().replace(
-							// 									'<img src="' + url + '"',
-							// 									'<img src="' + url + '" width="200"'))
+						if (img.width > 200)
 							editor.html(editor.html().replace(
 									'<img src="' + url + '"',
-									'<img src="' + url + '" width="200"'))
+									'<img src="' + url + '" width="200"'));
 					}
 				}
 			}
@@ -162,12 +275,14 @@ li {
 					li.appendTo("#userlist");
 					li.attr("id", obj[i]);
 					li.find('a').attr("href", "#session" + obj[i]);
-					li.find('a').html(obj[i]);
+					li.find('a').html(obj[i] + '<div class="nav-counter nav-counter-blue" style="display:none"></div>');
 
 					let session = $("#session").clone(true);
+
 					session.appendTo("#sessions");
 					session.attr("id", "session" + obj[i]);
 					session.find("ul").attr("id", "chatContent" + obj[i]);
+				
 					li.find('a').on(
 							'click',
 							function() {
@@ -194,9 +309,27 @@ li {
 			if (message.sender == nickname) {
 				obj = message.receiver;
 				box.find('img').prop("src", "resources/img/pika.png");
+				
 			} else {
+
 				obj = message.sender;
 				box.find('img').prop("src", "resources/img/duola.jpg");
+
+				if (isWindowFocus) {
+					msgCount = 0;
+					$("#session" + obj + " .msgCount").val(0);
+					$("a[href='#session" + obj + "'] .nav-counter").hide();
+				} else {
+					$("a[href='#session" + obj + "'] .nav-counter").show();
+					msgCount = $("#session" + obj + " .msgCount").val();
+					msgCount++;
+					$("#session" + obj + " .msgCount").val(msgCount);
+
+				}
+
+				$("a[href='#session" + obj + "'] .nav-counter").html(msgCount);
+				msgCount = 0;
+				doFlashTitle();
 			}
 
 			box.find('[ff="nickname"]').html(message.sender); //在box中设置昵称
@@ -221,7 +354,7 @@ li {
 		editor.sync();
 		var textarea = $(node).siblings("textarea");
 		var txt = textarea.val().replaceAll("\n", "").replaceAll("\r", "")
-				.replaceAll("\t", "");
+				.replaceAll("\t", "").replaceAll("\u200B", "");
 
 		var receiverid = fnode.id.split("session")[1].trim();
 		if (txt.length == 0) {
@@ -247,9 +380,10 @@ li {
 					<div class="panel-heading">
 						<h3 class="panel-title">客户列表</h3>
 					</div>
-					<div class="panel-body" style="height: 626px">
+					<div class="panel-body" style="height: 560px">
 						<!-- 			用户li模板 -->
-						<li id="user" style="display: none"><a href="">00</a></li>
+						<li id="user" class="user" style="display: none"><a href=""
+							class="nav-link"></a></li>
 
 						<ul id="userlist">
 
@@ -262,6 +396,7 @@ li {
 
 			<!-- 			会话模板 -->
 			<div id="session" class="session" style="display: none">
+				<input class="msgCount" style="display: none" value>
 				<div class="panel panel-primary">
 					<div class="panel-heading">
 						<h3 class="panel-title">与聊天中</h3>
@@ -285,6 +420,7 @@ li {
 							</ul>
 						</div>
 					</div>
+
 					<div class="panel-footer">
 						<form class="editarea" method="post">
 							<textarea name="content" style="width: 100%; height: 112px;">&lt;strong&gt;HTML内容&lt;/strong&gt;</textarea>

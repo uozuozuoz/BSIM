@@ -36,7 +36,6 @@ body {
 
 .editarea {
 	width: 800px;
-	height: 200px;
 	margin: auto;
 }
 
@@ -78,36 +77,70 @@ li {
 
 <script>
 	$(function() {
-		$(".am-comment-bd img").on("click",function(){
-			console.log("ii")
-			$(".bigimg").attr("src",$(event.srcElement).attr("src")).attr("style","width:"+$(event.srcElement).width*2);
-		})
-		
+		$(".am-comment-bd img").on(
+				"click",
+				function() {
+					console.log("ii")
+					$(".bigimg").attr("src", $(event.srcElement).attr("src"))
+							.attr("style",
+									"width:" + $(event.srcElement).width * 2);
+				})
+
 	})
 
+	var msgCount = 0;
+	// 	浏览器窗口焦点的判断
+	var isWindowFocus = true;
+	function focusin() {
+		isWindowFocus = true;
+		msgCount = 0;
+
+	}
+	function focusout() {
+		isWindowFocus = false;
+
+	}
+	// 	浏览器窗口焦点的切换
+	window.onfocus = focusin;
+	window.onblur = focusout;
+
+	var flashTitleRun = false;
+	var flashStep = 0;
+	var normalTitle = "与客服聊天中。。。";
+
+	function flashTitle() {
+		if (isWindowFocus) {
+			document.title = normalTitle;
+			flashTitleRun = false;
+			return;
+		} else {
+			flashTitleRun = true;
+			flashStep++;
+			if (flashStep == 3) {
+				flashStep = 1;
+			}
+			if (flashStep == 1) {
+				document.title = "【有" + msgCount + "条新消息。。。】";
+			}
+			if (flashStep == 2) {
+				document.title = "【。。。有" + msgCount + "条新消息 】";
+			}
+
+			setTimeout("flashTitle()", 500);
+		}
+	}
+
+	function doFlashTitle() {
+		if (!flashTitleRun) {
+			flashTitle();
+		}
+	}
 	var editor;
 	KindEditor.ready(function(K) {
 		var options = {
 			cssPath : 'resources/kindeditor/plugins/code/prettify.css',
 			filterMode : true,
-			uploadJson : 'resources/kindeditor/jsp/upload_json.jsp',
-			fileManagerJson : 'resources/kindeditor/jsp/file_manager_json.jsp',
-			allowFileManager : true,
-			afterUpload : function(url, data, name) { //上传文件后执行的回调函数，必须为3个参数
-				if (name == "image" || name == "multiimage") { //单个和批量上传图片时
-					var img = new Image();
-					img.src = url;
-					img.onload = function() { //图片必须加载完成才能获取尺寸
-						// 						if (img.width > 600)
-						// 							editor.html(editor.html().replace(
-						// 									'<img src="' + url + '"',
-						// 									'<img src="' + url + '" width="200"'))
-						editor.html(editor.html().replace(
-								'<img src="' + url + '"',
-								'<img src="' + url + '" width="200"'))
-					}
-				}
-			}
+			items : [ 'emoticons' ]
 		};
 		editor = K.create('textarea[name="content"]', options);
 		prettyPrint();
@@ -135,6 +168,9 @@ li {
 		box.appendTo("#chatContent"); //把box追加到聊天面板中
 		if (message.sender == "kefu") {
 			box.find('img').attr("src", "resources/img/pika.png");
+			msgCount++;
+			doFlashTitle();
+
 		} else {
 			box.find('img').attr("src", "resources/img/duola.jpg");
 		}
@@ -157,7 +193,7 @@ li {
 	function msg() {
 		editor.sync();
 		var txt = $("#editor_id").val().replaceAll("\n", "").replaceAll("\r",
-				"").replaceAll("\t", "");
+				"").replaceAll("\t", "").replaceAll("\u200B", "");
 		if (txt.length == 0) {
 			return;
 		}
