@@ -157,18 +157,6 @@ li {
 	src="resources/kindeditor/plugins/code/prettify.js"></script>
 
 <script>
-	$(function() {
-		$(".am-comment-bd img").on(
-				"click",
-				function() {
-					console.log("ss")
-					$(".bigimg").attr("src", $(event.srcElement).attr("src"))
-							.attr("style",
-									"width:" + $(event.srcElement).width * 2);
-				})
-
-	});
-
 	var msgCount = 0;
 	// 	浏览器窗口焦点的判断
 	var isWindowFocus = true;
@@ -277,12 +265,12 @@ li {
 					li.find('a').attr("href", "#session" + obj[i]);
 					li.find('a').html(obj[i] + '<div class="nav-counter nav-counter-blue" style="display:none"></div>');
 
-					let session = $("#session").clone(true);
+					let session = $("#session").clone();
 
 					session.appendTo("#sessions");
 					session.attr("id", "session" + obj[i]);
 					session.find("ul").attr("id", "chatContent" + obj[i]);
-				
+					
 					li.find('a').on(
 							'click',
 							function() {
@@ -293,7 +281,9 @@ li {
 								session.find(".panel-title").html(
 										"与"
 												+ session.attr("id").split(
-														"session")[1] + "聊天中")
+														"session")[1] + "聊天中");
+								$("a[href='#"+session.attr("id")+"'] .nav-counter").hide();
+								$("#" + session.attr("id") + " .msgCount").val(0);
 							})
 				}
 
