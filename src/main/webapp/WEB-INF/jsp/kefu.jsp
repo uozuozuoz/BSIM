@@ -162,6 +162,9 @@ li {
 	var isWindowFocus = true;
 	function focusin() {
 		isWindowFocus = true;
+		var nowSession = $(':visible #sessions .session :visible').parent(".session");
+		$("a[href='#"+nowSession.attr("id")+"'] .nav-counter").hide();
+		$("#" + nowSession.attr("id") + " .msgCount").val(0);
 		
 	}
 	function focusout() {
@@ -203,6 +206,8 @@ li {
 			flashTitle();
 		}
 	}
+	
+
 
 	var editor;
 	function createKE() {
@@ -328,6 +333,7 @@ li {
 			box.addClass(message.isSelf ? 'self' : ''); //右侧显示
 			// 						box.appendTo("#userlist"); //把box追加到聊天面板中
 			box.appendTo("#chatContent" + obj); //把box追加到聊天面板中
+			box[0].scrollIntoView();
 			var chatNode = $("#chatContent" + obj);
 
 		}
@@ -358,6 +364,19 @@ li {
 		// 发送消息
 		socket.send(obj);
 		editor.html("");
+	}
+	
+	
+	function reset() {
+
+		editor.html("");
+	}
+	
+	document.onkeydown=function(){
+		if(event.keyCode==13){
+			var nowSession = $(':visible #sessions .session :visible').parent(".session");
+			nowSession.find("input[value='发送']").click();
+		}
 	}
 </script>
 </head>
@@ -415,6 +434,7 @@ li {
 						<form class="editarea" method="post">
 							<textarea name="content" style="width: 100%; height: 112px;">&lt;strong&gt;HTML内容&lt;/strong&gt;</textarea>
 							<input type="button" value="发送" onclick="msg(this)">
+							<input type="button" value="清空" onclick="reset()">
 						</form>
 					</div>
 				</div>

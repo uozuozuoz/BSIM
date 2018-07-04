@@ -178,6 +178,7 @@ li {
 		box.find('[ff="msgdate"]').html(message.time); //在box中设置时间
 		box.find('[ff="content"]').html(message.content); //在box中设置内容
 		box.addClass(message.isSelf ? 'self' : ''); //右侧显示
+		box[0].scrollIntoView();
 		// 		box.addClass(msg.isSelf ? 'am-comment-warning' : 'am-comment-success');//颜色
 		// 		box.css((msg.isSelf ? 'margin-left' : 'margin-right'), "20%");//外边距
 		// 		$("#ChatBox div:eq(0)").scrollTop(999999); //滚动条移动至最底部
@@ -205,6 +206,17 @@ li {
 		// 发送消息
 		socket.send(obj);
 		editor.html("");
+	}
+	
+	function reset() {
+
+		editor.html("");
+	}
+	
+	document.onkeydown=function(){
+		if(event.keyCode==13){
+			$("input[value='发送']").click();
+		}
 	}
 </script>
 
@@ -239,6 +251,7 @@ li {
 					<textarea id="editor_id" name="content"
 						style="width: 100%; height: 100px;">&lt;strong&gt;HTML内容&lt;/strong&gt;</textarea>
 					<input id="send" type="button" value="发送" onclick="msg()">
+					<input id="reset" type="reset" value="清空" onreset="reset()">
 				</form>
 			</div>
 		</div>
