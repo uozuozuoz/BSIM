@@ -10,7 +10,7 @@
 <head>
 <base href="<%=basePath%>">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>与客服联系中...123</title>
+<title>与客服联系中...</title>
 <style>
 body {
 	background: url(resources/img/27.jpg) round;
